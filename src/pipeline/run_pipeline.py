@@ -8,9 +8,8 @@ from datetime import datetime
 import time
 
 
-# ----------------------------------------------------
-# 1. Cargar Variables de Entorno
-# ----------------------------------------------------
+# 1. Load environment variables
+
 load_dotenv(dotenv_path="/home/edgar_16/bigdata-sentiment-project/.env")
 
 HF_MODEL = os.getenv("HF_MODEL")
@@ -31,17 +30,15 @@ LIMIT = int(os.getenv("LIMIT", 200))
 LABELS = ["very_negative", "negative", "neutral", "positive", "very_positive"]
 
 
-# ----------------------------------------------------
-# 2. Conectar a MongoDB
-# ----------------------------------------------------
+# 2. Conect to MongoDB
+
 def get_mongo():
     client = MongoClient(MONGO_URI)
     db = client[MONGO_DB]
     return db[MONGO_COLLECTION]
 
-# ----------------------------------------------------
-# 3. Conectar a MySQL
-# ----------------------------------------------------
+# 3. Conect to MySQL
+
 def get_mysql():
     return mysql.connector.connect(
         host=MYSQL_HOST,
@@ -51,21 +48,19 @@ def get_mysql():
         database=MYSQL_DATABASE
     )
 
-# ----------------------------------------------------
-# 4. Cargar Modelo y Tokenizer
-# ----------------------------------------------------
+# 4. Load model and tokenizer from HuggingFace
+
 def load_model():
-    print("🔄 Cargando modelo desde HuggingFace...")
+    print("Loading model from HuggingFace...")
     tokenizer = AutoTokenizer.from_pretrained(HF_MODEL)
     model = AutoModelForSequenceClassification.from_pretrained(HF_MODEL)
     model.to(DEVICE)
     model.eval()
-    print("✅ Modelo cargado correctamente.")
+    print("Model loaded successfully.")
     return tokenizer, model
 
-# ----------------------------------------------------
-# 5. Predicción
-# ----------------------------------------------------
+# 5. Prediction
+
 def predict(texts, tokenizer, model):
     inputs = tokenizer(
         texts,
@@ -86,9 +81,8 @@ def predict(texts, tokenizer, model):
     labels = [LABELS[c] for c in classes]
     return labels, scores
 
-# ----------------------------------------------------
-# 6. Pipeline Principal
-# ----------------------------------------------------
+# 6. Main Pipeline
+
 def run_pipeline():
     collection = get_mongo()
     mysql_db = get_mysql()
@@ -96,21 +90,21 @@ def run_pipeline():
 
     tokenizer, model = load_model()
 
-    print("🔍 Buscando comentarios sin procesar en Mongo...")
+    print("Searching for unprocessed comments in Mongo...")
     docs = list(collection.find({"processed": False}).limit(LIMIT))
 
     if not docs:
-        print("😴 No hay comentarios pendientes.")
+        print("No unprocessed comments found.")
         return
 
-    print(f"📌 Procesando {len(docs)} comentarios...")
+    print(f"Processing {len(docs)} comments...")
 
     texts = [d["comment"] for d in docs]
     labels, scores = predict(texts, tokenizer, model)
 
     for doc, label, score in zip(docs, labels, scores):
 
-        # 1. Actualizar Mongo
+        # 1. Update Mongo
         collection.update_one(
             {"_id": doc["_id"]},
             {"$set": {
@@ -121,7 +115,7 @@ def run_pipeline():
             }}
         )
 
-        # 2. Insertar en MySQL
+        # 2. Insert into MySQL
         cursor.execute(
             """
             INSERT INTO sentiment_predictions
@@ -136,10 +130,8 @@ def run_pipeline():
     cursor.close()
     mysql_db.close()
 
-    print("🎉 Pipeline ejecutado correctamente.")
+    print("Pipeline executed successfully.")
 
-# ----------------------------------------------------
-# 7. Ejecutar
-# ----------------------------------------------------
+# 7. Execute
 if __name__ == "__main__":
     run_pipeline()

@@ -18,7 +18,7 @@ mongo = MongoClient("mongodb://localhost:27017")
 db = mongo["sentiment_db"]
 collection = db["raw_comments"]
 
-print("Consumer iniciado. Escuchando mensajes...")
+print("Consumer started. Listening for messages...")
 
 while True:
     msg = consumer.poll(1.0)
@@ -38,7 +38,7 @@ while True:
     }
 
 
-    print("→ Guardando:", enriched)
+    print("Received:", enriched)
     collection.insert_one(enriched)
 
     

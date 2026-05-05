@@ -250,13 +250,14 @@ def send_message():
     }
     producer.produce("twitter-comments", json.dumps(msg).encode("utf-8"))
     producer.flush()
-    print("Enviado:", msg)
+    print("Sent:", msg)
 
 def main():
-    print("Cliente iniciado.")
-    for _ in range(random.randint(5, 200)):  # Cantidad aleatoria de mensajes
+    print("Client started.")
+    for _ in range(random.randint(5, 200)):  # Aleatory number of messages to send
         send_message()
-        time.sleep(random.uniform(0.5, 3))  # Cadencia aleatoria
+        time.sleep(random.uniform(0.5, 3))  # Aleatory delay between messages
+    print("Client finished.")
 
 if __name__ == "__main__":
     main()
