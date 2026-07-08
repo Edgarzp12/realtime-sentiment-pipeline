@@ -18,9 +18,8 @@ services:
     depends_on:
       - zookeeper
 
-
   mongodb:
-    image: mongo:latest
+    image: mongo:7
     ports:
       - "27017:27017"
     volumes:
@@ -35,6 +34,7 @@ services:
       - "3306:3306"
     volumes:
       - ./data/mysql:/var/lib/mysql
+      - ./mysql/init.sql:/docker-entrypoint-initdb.d/init.sql
 
   metabase:
     image: metabase/metabase:latest
@@ -42,4 +42,5 @@ services:
       - "3000:3000"
     environment:
       MB_DB_FILE: /metabase.db
-
+    depends_on:
+      - mysql

@@ -1,59 +1,63 @@
-# Big Data Sentiment Analysis Project
+# Real-Time Sentiment Analysis Pipeline
 
-Este proyecto simula un pipeline de Big Data para análisis de sentimiento de texto en tiempo real.
+## Overview
 
-## Objetivo
+This project implements a data pipeline that simulates streaming social media data and performs sentiment analysis using a transformer-based model. It integrates MongoDB for ingestion, a processing pipeline for inference, and MySQL for structured storage of results.
 
-Simular comentarios tipo Twitter que son enviados por Kafka, almacenados en MongoDB y procesados por un modelo de Deep Learning para clasificar su sentimiento. Los resultados se guardan en MySQL y se visualizan con Metabase.
+## Architecture
 
-## Arquitectura
+* **Clients** generate simulated Twitter-like messages
+* **Consumer** ingests and stores data in MongoDB
+* **Pipeline** processes unstructured text using a HuggingFace model and stores results in MySQL
 
-Kafka + Zookeeper -> MongoDB -> Pipeline en Python (PyTorch + HuggingFace) -> MySQL -> Metabase
+## Tech Stack
 
-## Requisitos
+* Python
+* MongoDB
+* MySQL
+* HuggingFace Transformers
+* PyTorch
+* Docker
 
-- Docker
-- Docker Compose
-- Python 3.10+
+## Workflow
 
-## Estructura del proyecto
+1. Generate text data (clients)
+2. Store raw messages in MongoDB
+3. Retrieve unprocessed data
+4. Apply sentiment analysis (transformer model)
+5. Store structured results in MySQL
 
-bigdata-sentiment-project/
-├── clients/
-│ └── clients.py
-├── consumer/
-│ └── consumer.py
-├── pipeline/
-│ └── run_pipeline.py
+## Key Features
+
+* Batch processing of unprocessed records
+* GPU support (CUDA if available)
+* Integration of NoSQL and relational databases
+* End-to-end ML pipeline
+
+## Project Structure
+
+```text
+.
 ├── docker/
-│ └── docker-compose.yml
+├── src/
+│   ├── clients/
+│   ├── consumer/
+│   └── pipeline/
 ├── requirements.txt
 └── README.md
+```
 
-## Pasos para ejecutar el proyecto
+## How to Run
 
-### 1. Levantar la infraestructura con Docker
-cd docker
-docker compose up -d
+```bash
+docker-compose up
+python src/pipeline/run_pipeline.py
+```
 
-### 2. Crear el entorno virtual
-python3 -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
+## Key Insight
 
-### 3. Ejecutar el Producer (clientes)
-cd clients
-python clients.py
+Separating ingestion (MongoDB) from structured storage (MySQL) enables scalable processing pipelines for unstructured data.
 
-### 4. Ejecutar el Consumer
-cd consumer
-python consumer.py
+## Author
 
-### 5. Ejecutar el Pipeline de Machine Learning
-cd pipeline
-python run_pipeline.py
-
-### 6. Dashboard en Metabase
-Abrir en el navegador:
-
-http://localhost:3000
+Edgar Antonio Zeledón Pérez
